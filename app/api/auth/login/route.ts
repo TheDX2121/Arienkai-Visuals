@@ -25,5 +25,5 @@ export async function POST(request: NextRequest) {
   if (!ok) return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
 
   await setSessionCookie(signSession({ id: user.id, email: user.email, username: user.username, role: user.role }));
-  return NextResponse.redirect(new URL("/", request.url));
+  return NextResponse.redirect(new URL("/", request.url), { status: 303 });
 }

@@ -50,5 +50,5 @@ export async function POST(request: NextRequest) {
     }
   });
 
-  return NextResponse.redirect(new URL(`/post/${post.id}`, request.url));
+  return NextResponse.redirect(new URL(`/post/${post.id}`, request.url), { status: 303 });
 }
