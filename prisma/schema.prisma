@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  CREATOR
+  ADMIN
+}
+
+enum SubscriptionTier {
+  FREE
+  CREATOR
+  STUDIO
+}
+
+enum MediaType {
+  IMAGE
+  GIF
+  VIDEO
+}
+
+enum Visibility {
+  PUBLIC
+  FOLLOWERS
+  PREMIUM
+  PRIVATE
+}
+
+model User {
+  id             String         @id @default(cuid())
+  email          String         @unique
+  username       String         @unique
+  displayName    String
+  passwordHash   String?
+  avatarUrl      String?
+  bio            String         @default("")
+  role           Role           @default(USER)
+  subscription   SubscriptionTier @default(FREE)
+  posts          Post[]
+  comments       Comment[]
+  likes          Like[]
+  saves          Save[]
+  ratings        PreviewRating[]
+  followers      Follow[]       @relation("followers")
+  following      Follow[]       @relation("following")
+  notifications  Notification[] @relation("notificationRecipient")
+  sentNotifications Notification[] @relation("notificationActor")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  follower    User     @relation("following", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("followers", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  title       String
+  caption     String
+  mediaUrl    String
+  thumbnailUrl String?
+  mediaType   MediaType @default(IMAGE)
+  visibility  Visibility @default(PUBLIC)
+  isPremium   Boolean   @default(false)
+  hashtags    String[]
+  animeTags   String[]
+  likes       Like[]
+  comments    Comment[]
+  saves       Save[]
+  ratings     PreviewRating[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([authorId, createdAt])
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+model Save {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  body      String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model PreviewRating {
+  id          String   @id @default(cuid())
+  userId      String
+  postId      String
+  composition Int
+  color       Int
+  readability Int
+  motion      Int
+  clickAppeal Int
+  feedback    String?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String
+  level       String
+  thumbnailUrl String?
+  isPremium   Boolean  @default(false)
+  lessons     Lesson[]
+  createdAt   DateTime @default(now())
+}
+
+model Lesson {
+  id        String   @id @default(cuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title     String
+  videoUrl  String?
+  duration  Int
+  order     Int
+  isPreview Boolean  @default(false)
+}
+
+model Material {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String
+  fileUrl     String
+  thumbnailUrl String?
+  type        String
+  priceInr    Int      @default(0)
+  isPremium   Boolean  @default(false)
+  license     String   @default("Personal")
+  createdAt   DateTime @default(now())
+}
+
+model NewsItem {
+  id          String   @id @default(cuid())
+  title       String
+  source      String
+  url         String
+  summary     String?
+  publishedAt DateTime
+  createdAt   DateTime @default(now())
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  recipientId String
+  actorId     String?
+  type        String
+  body        String
+  link        String?
+  isRead      Boolean  @default(false)
+  recipient   User     @relation("notificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  actor       User?    @relation("notificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+}
