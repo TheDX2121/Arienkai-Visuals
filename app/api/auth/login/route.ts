@@ -12,18 +12,59 @@ const schema = z.object({
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
   const parsed = schema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) return NextResponse.json({ error: "Invalid login details" }, { status: 400 });
+
+  if (!parsed.success) {
+    return NextResponse.redirect(
+      new URL("/login?error=invalid-fields", request.url),
+      { status: 303 }
+    );
+  }
 
   const identifier = parsed.data.identifier.toLowerCase();
+
   const user = await prisma.user.findFirst({
-    where: { OR: [{ email: identifier }, { username: identifier }] },
-    select: { id: true, email: true, username: true, role: true, passwordHash: true }
+    where: {
+      OR: [
+        { email: identifier },
+        { username: identifier }
+      ]
+    },
+    select: {
+      id: true,
+      email: true,
+      username: true,
+      role: true,
+      passwordHash: true
+    }
   });
 
-  if (!user?.passwordHash) return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
-  const ok = await bcrypt.compare(parsed.data.password, user.passwordHash);
-  if (!ok) return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+  if (!user?.passwordHash) {
+    return NextResponse.redirect(
+      new URL("/login?error=invalid-credentials", request.url),
+      { status: 303 }
+    );
+  }
 
-  await setSessionCookie(signSession({ id: user.id, email: user.email, username: user.username, role: user.role }));
-  return NextResponse.redirect(new URL("/", request.url), { status: 303 });
+  const ok = await bcrypt.compare(parsed.data.password, user.passwordHash);
+
+  if (!ok) {
+    return NextResponse.redirect(
+      new URL("/login?error=invalid-credentials", request.url),
+      { status: 303 }
+    );
+  }
+
+  await setSessionCookie(
+    signSession({
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      role: user.role
+    })
+  );
+
+  return NextResponse.redirect(
+    new URL(`/profile/${user.username}`, request.url),
+    { status: 303 }
+  );
 }
