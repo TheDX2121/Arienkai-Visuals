@@ -16,10 +16,17 @@ export default async function CourseDetailPage({ params }: CourseDetailProps) {
     notFound();
   }
 
-  const lessons = Array.from({ length: Math.min(course.lessons, 8) }).map((_, index) => ({
+  const lessons = Array.from({ length: course.lessons }).map((_, index) => ({
     number: index + 1,
-    title: `Lesson ${index + 1}: ${index === 0 ? "Course introduction" : "Editing workflow breakdown"}`,
-    duration: `${8 + index * 3} min`
+    title:
+      index === 0
+        ? "Course introduction"
+        : index === 1
+          ? "Project setup and workflow"
+          : index === 2
+            ? "Main editing breakdown"
+            : `Advanced lesson ${index + 1}`,
+    duration: `${8 + index * 2} min`
   }));
 
   return (
@@ -42,11 +49,12 @@ export default async function CourseDetailPage({ params }: CourseDetailProps) {
         </div>
 
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/signup" className="primary-button">
+          <Link href={`/courses/${course.id}/lesson/1`} className="primary-button">
             Start course
           </Link>
-          <Link href="/premium" className="secondary-button">
-            Unlock premium
+
+          <Link href="/courses" className="secondary-button">
+            Back to courses
           </Link>
         </div>
       </div>
@@ -55,16 +63,25 @@ export default async function CourseDetailPage({ params }: CourseDetailProps) {
         <h2 className="text-2xl font-black">Course lessons</h2>
 
         {lessons.map((lesson) => (
-          <div key={lesson.number} className="glass-panel flex items-center justify-between rounded-2xl p-4">
+          <Link
+            key={lesson.number}
+            href={`/courses/${course.id}/lesson/${lesson.number}`}
+            className="glass-panel flex items-center justify-between rounded-2xl p-4 transition hover:bg-white/10"
+          >
             <div>
-              <div className="font-bold">{lesson.title}</div>
-              <div className="mt-1 text-sm text-white/45">{lesson.duration}</div>
+              <div className="font-bold">
+                {lesson.number}. {lesson.title}
+              </div>
+
+              <div className="mt-1 text-sm text-white/45">
+                {lesson.duration}
+              </div>
             </div>
 
-            <button className="rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-white">
+            <span className="rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-white">
               Preview
-            </button>
-          </div>
+            </span>
+          </Link>
         ))}
       </div>
     </section>
