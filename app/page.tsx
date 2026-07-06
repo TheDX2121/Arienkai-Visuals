@@ -601,6 +601,195 @@ export default async function HomePage() {
                     ) : null}
                   </div>
 
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import { currentUser } from "@/lib/auth";
+import { HomeHeroSlider } from "@/components/home-hero-slider";
+
+
+async function getSlides() {
+
+  try {
+
+    const slides = await prisma.$queryRaw<any[]>`
+
+      SELECT
+        "id",
+        "title",
+        "description",
+        "imageUrl",
+        "href",
+        "buttonLabel",
+        "tag",
+        "meta",
+        "type"
+
+      FROM "HomeSlide"
+
+      WHERE "isActive" = true
+
+      ORDER BY
+      "sortOrder" ASC
+
+      LIMIT 10
+
+    `;
+
+
+    return slides.map((slide)=>({
+
+      id: slide.id,
+
+      title: slide.title,
+
+      description: slide.description,
+
+      imageUrl: slide.imageUrl,
+
+      href: slide.href,
+
+      primaryLabel: slide.buttonLabel,
+
+      tag: slide.tag,
+
+      meta: slide.meta,
+
+      type: slide.type
+
+    }));
+
+
+  } catch {
+
+    return [];
+
+  }
+
+}
+
+
+
+export default async function HomePage(){
+
+  const user = await currentUser();
+
+
+  const slides = await getSlides();
+
+
+  return (
+
+    <main className="min-h-screen bg-black">
+
+
+      <HomeHeroSlider
+
+        slides={slides}
+
+        isLoggedIn={Boolean(user)}
+
+      />
+
+
+
+      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+
+
+        <div className="grid gap-5 md:grid-cols-3">
+
+
+          <Link
+
+            href="/courses"
+
+            className="glass-panel rounded-[2rem] p-6"
+
+          >
+
+            <span className="pill">
+              Courses
+            </span>
+
+
+            <h2 className="mt-4 text-3xl font-black">
+              Learn editing
+            </h2>
+
+
+            <p className="mt-3 text-white/55">
+              Premium and free editing courses.
+            </p>
+
+
+          </Link>
+
+
+
+          <Link
+
+            href="/explore"
+
+            className="glass-panel rounded-[2rem] p-6"
+
+          >
+
+            <span className="pill">
+              Explore
+            </span>
+
+
+            <h2 className="mt-4 text-3xl font-black">
+              Discover creators
+            </h2>
+
+
+            <p className="mt-3 text-white/55">
+              Explore artwork and creator posts.
+            </p>
+
+
+          </Link>
+
+
+
+          <Link
+
+            href="/materials"
+
+            className="glass-panel rounded-[2rem] p-6"
+
+          >
+
+            <span className="pill">
+              Materials
+            </span>
+
+
+            <h2 className="mt-4 text-3xl font-black">
+              Download assets
+            </h2>
+
+
+            <p className="mt-3 text-white/55">
+              GFX packs, presets and resources.
+            </p>
+
+
+          </Link>
+
+
+        </div>
+
+
+      </section>
+
+
+
+    </main>
+
+  );
+
+          }
                   <div className="p-4">
                     <div className="flex flex-wrap gap-2">
                       <span className="pill">{material.fileType}</span>
@@ -644,36 +833,7 @@ export default async function HomePage() {
                 key={card.id}
                 href={card.href}
                 className="card-hover glass-panel rounded-[2rem] p-6"
-              >
-                <div className="pill mb-4 w-fit">
-                  {card.label}
-                </div>
-
-                <h3 className="text-3xl font-black">
-                  {card.title}
-                </h3>
-
-                <p className="mt-3 text-sm leading-6 text-white/55">
-                  {card.description}
-                </p>
-              </Link>
-            ))}
-          </div>
-        ) : null}
-      </section>
-    </div>
-  );
-      }
-phics, and UI/UX.
-            </p>
-          </Link>
-
-          <Link href="/explore" className="card-hover glass-panel rounded-[2rem] p-6">
-            <div className="pill mb-4 w-fit">Explore</div>
-
-            <h2 className="text-3xl font-black">
-              Discover creators
-            </h2>
+          </h2>
 
             <p className="mt-3 text-sm leading-6 text-white/55">
               See posts, edits, artwork, thumbnails, GFX previews, and creator uploads.
