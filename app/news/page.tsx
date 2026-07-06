@@ -55,7 +55,7 @@ export default async function NewsPage() {
 
       {featured ? (
         <Link
-          href={`/news/${featured.slug}`}
+          href={`/news/${featured.id}`}
           className="card-hover glass-panel mb-8 grid overflow-hidden rounded-[2rem] lg:grid-cols-[1.15fr_.85fr]"
         >
           <div className="relative min-h-[340px] bg-gradient-to-br from-red-700 via-black to-purple-900">
@@ -96,7 +96,7 @@ export default async function NewsPage() {
           {rest.map((item) => (
             <Link
               key={item.id}
-              href={`/news/${item.slug}`}
+              href={`/news/${item.id}`}
               className="card-hover glass-panel overflow-hidden rounded-[1.75rem]"
             >
               <div className="relative h-44 bg-gradient-to-br from-red-700 via-black to-purple-900">
@@ -109,7 +109,9 @@ export default async function NewsPage() {
                 ) : null}
 
                 <div className="absolute inset-0 bg-black/35" />
-                <span className="pill absolute left-4 top-4 bg-black/40">{item.tag}</span>
+                <span className="pill absolute left-4 top-4 bg-black/40">
+                  {item.tag}
+                </span>
               </div>
 
               <div className="p-4">
