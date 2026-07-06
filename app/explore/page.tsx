@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { NameWithBadge } from "@/components/user-plan-badge";
 
 type DbPost = {
   id: string;
@@ -12,6 +13,7 @@ type DbPost = {
   mediaType: string;
   createdAt: Date;
   username: string | null;
+  subscription: string | null;
 };
 
 async function getPosts() {
@@ -27,7 +29,8 @@ async function getPosts() {
         p."fileUrl",
         p."mediaType",
         p."createdAt",
-        u."username"
+        u."username",
+        u."subscription"
       FROM "Post" p
       LEFT JOIN "User" u ON u."id" = p."authorId"
       ORDER BY p."createdAt" DESC
@@ -108,7 +111,9 @@ export default async function ExplorePage() {
                   ) : null}
 
                   <span className="pill">
-                    @{post.username || "creator"}
+                    <NameWithBadge subscription={post.subscription}>
+                      @{post.username || "creator"}
+                    </NameWithBadge>
                   </span>
                 </div>
               </div>
