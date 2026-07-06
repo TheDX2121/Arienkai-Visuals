@@ -18,6 +18,7 @@ type DbCourse = {
   lessons: number;
   duration: string;
   gradient: string;
+  thumbnailUrl: string | null;
   isPremium: boolean;
 };
 
@@ -42,6 +43,7 @@ async function getDatabaseCourse(id: string) {
         "lessons",
         "duration",
         "gradient",
+        "thumbnailUrl",
         "isPremium"
       FROM "Course"
       WHERE "id" = ${id}
@@ -98,6 +100,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
         lessons: dbCourse.lessons,
         duration: dbCourse.duration,
         gradient: dbCourse.gradient,
+        thumbnailUrl: dbCourse.thumbnailUrl,
         premium: dbCourse.isPremium,
         source: "database" as const
       }
@@ -109,6 +112,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
         lessons: demoCourse!.lessons,
         duration: demoCourse!.duration,
         gradient: demoCourse!.gradient,
+        thumbnailUrl: null,
         premium: false,
         source: "demo" as const
       };
@@ -178,6 +182,29 @@ export default async function LessonPage({ params }: LessonPageProps) {
                 controls
                 className="max-h-[460px] w-full rounded-2xl"
               />
+            ) : course.thumbnailUrl ? (
+              <div className="relative grid min-h-[460px] w-full place-items-center overflow-hidden rounded-2xl">
+                <img
+                  src={course.thumbnailUrl}
+                  alt={course.title}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/60" />
+
+                <div className="relative z-10 text-center">
+                  <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-white/15 text-3xl">
+                    ▶
+                  </div>
+
+                  <h2 className="mt-6 text-3xl font-black">
+                    {currentLesson.title}
+                  </h2>
+
+                  <p className="mx-auto mt-3 max-w-xl text-white/65">
+                    No video URL added yet. Add a Cloudinary, YouTube, Vimeo, or direct video URL from the admin panel.
+                  </p>
+                </div>
+              </div>
             ) : (
               <div>
                 <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-white/15 text-3xl">
