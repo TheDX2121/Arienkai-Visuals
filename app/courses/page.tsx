@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { courses as demoCourses } from "@/lib/demo-data";
 import { prisma } from "@/lib/prisma";
 
 type DbCourse = {
@@ -38,26 +37,7 @@ async function getDatabaseCourses() {
 }
 
 export default async function CoursesPage() {
-  const databaseCourses = await getDatabaseCourses();
-
-  const courses = [
-    ...databaseCourses.map((course) => ({
-      id: course.id,
-      title: course.title,
-      description: course.description,
-      level: course.level,
-      lessons: course.lessons,
-      duration: course.duration,
-      gradient: course.gradient,
-      thumbnailUrl: course.thumbnailUrl,
-      premium: course.isPremium
-    })),
-    ...demoCourses.map((course) => ({
-      ...course,
-      thumbnailUrl: null,
-      premium: false
-    }))
-  ];
+  const courses = await getDatabaseCourses();
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -73,60 +53,66 @@ export default async function CoursesPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {courses.map((course) => (
-          <Link
-            key={course.id}
-            href={`/courses/${course.id}`}
-            className="card-hover glass-panel block min-h-[315px] overflow-hidden rounded-[1.75rem]"
-          >
-            <div className={`relative h-40 overflow-hidden bg-gradient-to-br ${course.gradient} p-4`}>
-              {course.thumbnailUrl ? (
-                <img
-                  src={course.thumbnailUrl}
-                  alt={course.title}
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-              ) : null}
+      {courses.length ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {courses.map((course) => (
+            <Link
+              key={course.id}
+              href={`/courses/${course.id}`}
+              className="card-hover glass-panel block min-h-[315px] overflow-hidden rounded-[1.75rem]"
+            >
+              <div className={`relative h-40 overflow-hidden bg-gradient-to-br ${course.gradient} p-4`}>
+                {course.thumbnailUrl ? (
+                  <img
+                    src={course.thumbnailUrl}
+                    alt={course.title}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                ) : null}
 
-              <div className="absolute inset-0 bg-black/25" />
+                <div className="absolute inset-0 bg-black/25" />
 
-              <div className="relative z-10 flex gap-2">
-                <span className="pill bg-black/30">{course.level}</span>
+                <div className="relative z-10 flex gap-2">
+                  <span className="pill bg-black/30">{course.level}</span>
 
-                {course.premium ? (
-                  <span className="pill bg-gold/25 text-yellow-100">
-                    Premium
-                  </span>
-                ) : (
-                  <span className="pill bg-black/30">
-                    Free
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="p-4">
-              <div className="text-lg font-black">
-                {course.title}
+                  {course.isPremium ? (
+                    <span className="pill bg-gold/25 text-yellow-100">
+                      Premium
+                    </span>
+                  ) : (
+                    <span className="pill bg-black/30">
+                      Free
+                    </span>
+                  )}
+                </div>
               </div>
 
-              <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/58">
-                {course.description}
-              </p>
+              <div className="p-4">
+                <div className="text-lg font-black">
+                  {course.title}
+                </div>
 
-              <div className="mt-4 flex items-center justify-between text-xs text-white/50">
-                <span>{course.lessons} lessons</span>
-                <span>{course.duration}</span>
-              </div>
+                <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/58">
+                  {course.description}
+                </p>
 
-              <div className="mt-5 rounded-full bg-white px-4 py-2 text-center text-xs font-black text-black">
-                Open course
+                <div className="mt-4 flex items-center justify-between text-xs text-white/50">
+                  <span>{course.lessons} lessons</span>
+                  <span>{course.duration}</span>
+                </div>
+
+                <div className="mt-5 rounded-full bg-white px-4 py-2 text-center text-xs font-black text-black">
+                  Open course
+                </div>
               </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <div className="glass-panel rounded-[2rem] p-8 text-white/55">
+          No courses have been added yet. Add courses from the admin panel.
+        </div>
+      )}
     </section>
   );
 }
