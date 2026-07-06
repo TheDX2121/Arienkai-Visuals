@@ -10,6 +10,7 @@ type DbCourse = {
   lessons: number;
   duration: string;
   gradient: string;
+  thumbnailUrl: string | null;
   isPremium: boolean;
   createdAt: Date;
 };
@@ -25,6 +26,7 @@ async function getDatabaseCourses() {
         "lessons",
         "duration",
         "gradient",
+        "thumbnailUrl",
         "isPremium",
         "createdAt"
       FROM "Course"
@@ -47,10 +49,12 @@ export default async function CoursesPage() {
       lessons: course.lessons,
       duration: course.duration,
       gradient: course.gradient,
+      thumbnailUrl: course.thumbnailUrl,
       premium: course.isPremium
     })),
     ...demoCourses.map((course) => ({
       ...course,
+      thumbnailUrl: null,
       premium: false
     }))
   ];
@@ -76,8 +80,18 @@ export default async function CoursesPage() {
             href={`/courses/${course.id}`}
             className="card-hover glass-panel block min-h-[315px] overflow-hidden rounded-[1.75rem]"
           >
-            <div className={`h-40 bg-gradient-to-br ${course.gradient} p-4`}>
-              <div className="flex gap-2">
+            <div className={`relative h-40 overflow-hidden bg-gradient-to-br ${course.gradient} p-4`}>
+              {course.thumbnailUrl ? (
+                <img
+                  src={course.thumbnailUrl}
+                  alt={course.title}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              ) : null}
+
+              <div className="absolute inset-0 bg-black/25" />
+
+              <div className="relative z-10 flex gap-2">
                 <span className="pill bg-black/30">{course.level}</span>
 
                 {course.premium ? (
