@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SearchBox } from "@/components/search-box";
 import { currentUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { NameWithBadge } from "@/components/user-plan-badge";
 
 const links = [
@@ -11,8 +12,30 @@ const links = [
   { href: "/premium", label: "Premium" }
 ];
 
+type SubscriptionRow = {
+  subscription: string | null;
+};
+
+async function getUserSubscription(userId?: string) {
+  if (!userId) return "FREE";
+
+  try {
+    const rows = await prisma.$queryRaw<SubscriptionRow[]>`
+      SELECT "subscription"
+      FROM "User"
+      WHERE "id" = ${userId}
+      LIMIT 1
+    `;
+
+    return rows[0]?.subscription || "FREE";
+  } catch {
+    return "FREE";
+  }
+}
+
 export async function Navbar() {
   const user = await currentUser();
+  const subscription = await getUserSubscription(user?.id);
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-surface/78 backdrop-blur-xl">
@@ -57,7 +80,7 @@ export async function Navbar() {
               ) : null}
 
               <Link href={`/profile/${user.username}`} className="primary-button">
-                <NameWithBadge subscription={user.subscription}>
+                <NameWithBadge subscription={subscription}>
                   @{user.username}
                 </NameWithBadge>
               </Link>
