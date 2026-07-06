@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { courses as demoCourses } from "@/lib/demo-data";
 import { prisma } from "@/lib/prisma";
 
 type CourseDetailProps = {
@@ -76,60 +75,13 @@ async function getDatabaseLessons(courseId: string) {
 export default async function CourseDetailPage({ params }: CourseDetailProps) {
   const { id } = await params;
 
-  const dbCourse = await getDatabaseCourse(id);
-  const demoCourse = dbCourse ? null : demoCourses.find((item) => item.id === id);
+  const course = await getDatabaseCourse(id);
 
-  if (!dbCourse && !demoCourse) {
+  if (!course) {
     notFound();
   }
 
-  const course = dbCourse
-    ? {
-        id: dbCourse.id,
-        title: dbCourse.title,
-        description: dbCourse.description,
-        level: dbCourse.level,
-        lessons: dbCourse.lessons,
-        duration: dbCourse.duration,
-        gradient: dbCourse.gradient,
-        thumbnailUrl: dbCourse.thumbnailUrl,
-        premium: dbCourse.isPremium,
-        source: "database" as const
-      }
-    : {
-        id: demoCourse!.id,
-        title: demoCourse!.title,
-        description: demoCourse!.description,
-        level: demoCourse!.level,
-        lessons: demoCourse!.lessons,
-        duration: demoCourse!.duration,
-        gradient: demoCourse!.gradient,
-        thumbnailUrl: null,
-        premium: false,
-        source: "demo" as const
-      };
-
-  const dbLessons = dbCourse ? await getDatabaseLessons(course.id) : [];
-
-  const lessons =
-    course.source === "database"
-      ? dbLessons
-      : Array.from({ length: course.lessons }).map((_, index) => ({
-          id: `demo_${index + 1}`,
-          title:
-            index === 0
-              ? "Course introduction"
-              : index === 1
-                ? "Project setup and workflow"
-                : index === 2
-                  ? "Main editing breakdown"
-                  : `Advanced lesson ${index + 1}`,
-          description: "Demo lesson preview.",
-          duration: `${8 + index * 2} min`,
-          order: index + 1,
-          isPreview: index === 0
-        }));
-
+  const lessons = await getDatabaseLessons(course.id);
   const firstLesson = lessons[0];
 
   return (
@@ -149,7 +101,7 @@ export default async function CourseDetailPage({ params }: CourseDetailProps) {
           <div className="flex flex-wrap gap-2">
             <span className="pill bg-black/30">{course.level}</span>
 
-            {course.premium ? (
+            {course.isPremium ? (
               <span className="pill bg-gold/25 text-yellow-100">Premium</span>
             ) : (
               <span className="pill bg-black/30">Free</span>
