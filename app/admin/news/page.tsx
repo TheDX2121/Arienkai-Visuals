@@ -60,12 +60,29 @@ export default async function AdminNewsPage() {
         </summary>
 
         <div className="mt-4 flex flex-wrap gap-3">
-          <Link href="/admin" className="secondary-button">Dashboard</Link>
-          <Link href="/admin/courses" className="secondary-button">Courses</Link>
-          <Link href="/admin/materials" className="secondary-button">Materials</Link>
-          <Link href="/admin/news" className="primary-button">News</Link>
-          <Link href="/admin/users" className="secondary-button">Users</Link>
-          <Link href="/admin/footer" className="secondary-button">Footer</Link>
+          <Link href="/admin" className="secondary-button">
+            Dashboard
+          </Link>
+
+          <Link href="/admin/courses" className="secondary-button">
+            Courses
+          </Link>
+
+          <Link href="/admin/materials" className="secondary-button">
+            Materials
+          </Link>
+
+          <Link href="/admin/news" className="primary-button">
+            News
+          </Link>
+
+          <Link href="/admin/users" className="secondary-button">
+            Users
+          </Link>
+
+          <Link href="/admin/footer" className="secondary-button">
+            Footer
+          </Link>
         </div>
       </details>
 
@@ -87,9 +104,19 @@ export default async function AdminNewsPage() {
         </summary>
 
         <form action="/api/admin/news" method="post" className="mt-5 grid gap-4">
-          <input className="input" name="title" placeholder="News title" required />
+          <input
+            className="input"
+            name="title"
+            placeholder="News title"
+            required
+          />
 
-          <input className="input" name="tag" placeholder="Anime, Editing, Creator, Platform..." defaultValue="News" />
+          <input
+            className="input"
+            name="tag"
+            placeholder="Anime, Editing, Creator, Platform..."
+            defaultValue="News"
+          />
 
           <textarea
             className="input min-h-24"
@@ -113,7 +140,11 @@ export default async function AdminNewsPage() {
             placeholder="Paste image URL or upload image"
           />
 
-          <input className="input" name="sourceUrl" placeholder="Source URL optional" />
+          <input
+            className="input"
+            name="sourceUrl"
+            placeholder="Source URL optional"
+          />
 
           <label className="flex items-center gap-3 text-sm font-bold">
             <input name="isFeatured" type="checkbox" />
@@ -132,28 +163,50 @@ export default async function AdminNewsPage() {
             <details key={item.id} className="glass-panel rounded-[2rem] p-5">
               <summary className="cursor-pointer">
                 <div className="inline-flex flex-wrap items-center gap-3">
-                  <span className="text-xl font-black">{item.title}</span>
-                  <span className="pill">{item.tag}</span>
-                  {item.isFeatured ? <span className="pill bg-gold/20 text-yellow-100">Featured</span> : null}
+                  <span className="text-xl font-black">
+                    {item.title}
+                  </span>
+
+                  <span className="pill">
+                    {item.tag}
+                  </span>
+
+                  {item.isFeatured ? (
+                    <span className="pill bg-gold/20 text-yellow-100">
+                      Featured
+                    </span>
+                  ) : null}
                 </div>
               </summary>
 
               <div className="mt-5 flex flex-wrap gap-3">
-                <Link href={`/news/${item.slug}`} className="secondary-button">
+                <Link href={`/news/${item.id}`} className="secondary-button">
                   View news
                 </Link>
               </div>
 
               <details className="mt-5 rounded-2xl bg-white/5 p-4">
-                <summary className="cursor-pointer font-black">Edit news</summary>
+                <summary className="cursor-pointer font-black">
+                  Edit news
+                </summary>
 
                 <form
                   action={`/api/admin/news/${item.id}/update`}
                   method="post"
                   className="mt-4 grid gap-4"
                 >
-                  <input className="input" name="title" defaultValue={item.title} required />
-                  <input className="input" name="tag" defaultValue={item.tag} />
+                  <input
+                    className="input"
+                    name="title"
+                    defaultValue={item.title}
+                    required
+                  />
+
+                  <input
+                    className="input"
+                    name="tag"
+                    defaultValue={item.tag}
+                  />
 
                   <textarea
                     className="input min-h-24"
@@ -178,10 +231,18 @@ export default async function AdminNewsPage() {
                     placeholder="Paste image URL or upload image"
                   />
 
-                  <input className="input" name="sourceUrl" defaultValue={item.sourceUrl || ""} />
+                  <input
+                    className="input"
+                    name="sourceUrl"
+                    defaultValue={item.sourceUrl || ""}
+                  />
 
                   <label className="flex items-center gap-3 text-sm font-bold">
-                    <input name="isFeatured" type="checkbox" defaultChecked={item.isFeatured} />
+                    <input
+                      name="isFeatured"
+                      type="checkbox"
+                      defaultChecked={item.isFeatured}
+                    />
                     Featured news
                   </label>
 
