@@ -119,8 +119,12 @@ export default async function AdminNavbarPage() {
           defaultValue={settings.logoUrl}
           resourceType="image"
           buttonText="Upload logo"
-          placeholder="Paste logo URL or upload image"
+          placeholder="Paste logo link or code path like /brand/arienkai-logo.png"
         />
+
+        <p className="mt-2 text-xs text-white/40">
+          You can upload a logo, paste a Cloudinary URL, or paste a code path like /brand/arienkai-logo.png.
+        </p>
 
         <label className="mb-2 mt-5 block text-sm font-bold">
           Navbar links
