@@ -1,33 +1,59 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { currentUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
-type RouteContext = { params: Promise<{ username: string }> };
+type DbUser = {
+  id: string;
+};
 
-export async function POST(_request: NextRequest, { params }: RouteContext) {
-  const { username } = await params;
+type ExistingRow = {
+  id: string;
+};
+
+export async function POST(
+  request: NextRequest,
+  context: { params: Promise<{ username: string }> }
+) {
   const user = await currentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const target = await prisma.user.findUnique({ where: { username }, select: { id: true } });
-  if (!target) return NextResponse.json({ error: "User not found" }, { status: 404 });
-  if (target.id === user.id) return NextResponse.json({ error: "You cannot follow yourself" }, { status: 400 });
-
-  const existing = await prisma.follow.findUnique({ where: { followerId_followingId: { followerId: user.id, followingId: target.id } } });
-  if (existing) {
-    await prisma.follow.delete({ where: { id: existing.id } });
-    return NextResponse.json({ following: false });
+  if (!user) {
+    return NextResponse.json({ ok: false }, { status: 401 });
   }
 
-  await prisma.follow.create({ data: { followerId: user.id, followingId: target.id } });
-  await prisma.notification.create({
-    data: {
-      recipientId: target.id,
-      actorId: user.id,
-      type: "FOLLOW",
-      body: `${user.username} followed you`,
-      link: `/profile/${user.username}`
-    }
-  });
-  return NextResponse.json({ following: true });
+  const { username } = await context.params;
+
+  const users = await prisma.$queryRaw<DbUser[]>`
+    SELECT "id"
+    FROM "User"
+    WHERE "username" = ${username}
+    LIMIT 1
+  `;
+
+  const targetUser = users[0];
+
+  if (!targetUser || targetUser.id === user.id) {
+    return NextResponse.json({ ok: false }, { status: 400 });
+  }
+
+  const existing = await prisma.$queryRaw<ExistingRow[]>`
+    SELECT "id"
+    FROM "Follow"
+    WHERE "followerId" = ${user.id}
+    AND "followingId" = ${targetUser.id}
+    LIMIT 1
+  `;
+
+  if (existing[0]) {
+    await prisma.$executeRaw`
+      DELETE FROM "Follow"
+      WHERE "id" = ${existing[0].id}
+    `;
+  } else {
+    await prisma.$executeRaw`
+      INSERT INTO "Follow" ("id", "followerId", "followingId", "createdAt")
+      VALUES (${`follow_${user.id}_${targetUser.id}_${Date.now()}`}, ${user.id}, ${targetUser.id}, NOW())
+    `;
+  }
+
+  return NextResponse.json({ ok: true });
 }
