@@ -39,18 +39,20 @@ export async function POST(request: NextRequest) {
 
   const formData = await request.formData();
 
+  const logoUrl = String(formData.get("logoUrl") || "").trim();
   const brand = String(formData.get("brand") || "").trim();
   const description = String(formData.get("description") || "").trim();
   const createLinks = String(formData.get("createLinks") || "").trim();
   const platformLinks = String(formData.get("platformLinks") || "").trim();
 
-  if (!brand || !description || !createLinks || !platformLinks) {
+  if (!logoUrl || !brand || !description || !createLinks || !platformLinks) {
     return NextResponse.redirect(
       new URL("/admin/footer?error=missing-fields", request.url),
       { status: 303 }
     );
   }
 
+  await upsertSetting("footer_logo_url", logoUrl);
   await upsertSetting("footer_brand", brand);
   await upsertSetting("footer_description", description);
   await upsertSetting("footer_create_links", createLinks);
