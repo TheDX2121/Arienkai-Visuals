@@ -1,19 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { currentUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
-type RouteContext = { params: Promise<{ id: string }> };
+type ExistingRow = {
+  id: string;
+};
 
-export async function POST(_request: NextRequest, { params }: RouteContext) {
-  const { id } = await params;
+export async function POST(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   const user = await currentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const existing = await prisma.like.findUnique({ where: { userId_postId: { userId: user.id, postId: id } } });
-  if (existing) {
-    await prisma.like.delete({ where: { id: existing.id } });
-    return NextResponse.json({ liked: false });
+  if (!user) {
+    return NextResponse.json({ ok: false }, { status: 401 });
   }
-  await prisma.like.create({ data: { userId: user.id, postId: id } });
-  return NextResponse.json({ liked: true });
+
+  const { id } = await context.params;
+
+  const existing = await prisma.$queryRaw<ExistingRow[]>`
+    SELECT "id"
+    FROM "PostLike"
+    WHERE "postId" = ${id}
+    AND "userId" = ${user.id}
+    LIMIT 1
+  `;
+
+  if (existing[0]) {
+    await prisma.$executeRaw`
+      DELETE FROM "PostLike"
+      WHERE "id" = ${existing[0].id}
+    `;
+  } else {
+    await prisma.$executeRaw`
+      INSERT INTO "PostLike" ("id", "postId", "userId", "createdAt")
+      VALUES (${`like_${id}_${user.id}_${Date.now()}`}, ${id}, ${user.id}, NOW())
+    `;
+  }
+
+  return NextResponse.json({ ok: true });
 }
