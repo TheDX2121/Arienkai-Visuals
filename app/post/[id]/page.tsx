@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { NameWithBadge } from "@/components/user-plan-badge";
 
 type PostProps = {
   params: Promise<{
@@ -19,6 +20,7 @@ type DbPost = {
   mediaType: string;
   createdAt: Date;
   username: string | null;
+  subscription: string | null;
 };
 
 async function getPost(id: string) {
@@ -34,7 +36,8 @@ async function getPost(id: string) {
         p."fileUrl",
         p."mediaType",
         p."createdAt",
-        u."username"
+        u."username",
+        u."subscription"
       FROM "Post" p
       LEFT JOIN "User" u ON u."id" = p."authorId"
       WHERE p."id" = ${id}
@@ -92,9 +95,11 @@ export default async function PostDetailPage({ params }: PostProps) {
 
         <Link
           href={post.username ? `/profile/${post.username}` : "/explore"}
-          className="mt-3 block text-white/55 hover:text-white"
+          className="mt-3 inline-flex text-white/55 hover:text-white"
         >
-          by @{post.username || "creator"}
+          <NameWithBadge subscription={post.subscription}>
+            by @{post.username || "creator"}
+          </NameWithBadge>
         </Link>
 
         <p className="mt-5 whitespace-pre-line leading-7 text-white/65">
