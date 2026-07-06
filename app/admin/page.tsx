@@ -35,14 +35,14 @@ export default async function AdminPage() {
       description: "Edit footer brand, description, and links."
     },
     {
-      title: "News",
-      href: "/admin",
-      description: "Coming later: anime and creator news."
+      title: "Users",
+      href: "/admin/users",
+      description: "Manage users, roles, premium plans, posts, followers, and moderation."
     },
     {
-      title: "Users",
+      title: "News",
       href: "/admin",
-      description: "Coming later: roles, premium access, and moderation."
+      description: "Coming next: anime and creator news."
     }
   ];
 
@@ -76,7 +76,9 @@ export default async function AdminPage() {
               href={section.href}
               className="card-hover rounded-[1.5rem] bg-white/5 p-5 transition hover:bg-white/10"
             >
-              <h2 className="text-2xl font-black">{section.title}</h2>
+              <h2 className="text-2xl font-black">
+                {section.title}
+              </h2>
 
               <p className="mt-3 text-sm leading-6 text-white/55">
                 {section.description}
