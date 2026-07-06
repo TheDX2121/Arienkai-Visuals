@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
 
   const title = String(formData.get("title") || "").trim();
   const description = String(formData.get("description") || "").trim();
+  const categoryId = String(formData.get("categoryId") || "").trim();
   const level = String(formData.get("level") || "Beginner").trim();
   const lessons = Number(formData.get("lessons") || 1);
   const duration = String(formData.get("duration") || "1h").trim();
@@ -58,6 +59,7 @@ export async function POST(request: NextRequest) {
       "title",
       "slug",
       "description",
+      "categoryId",
       "level",
       "lessons",
       "duration",
@@ -73,6 +75,7 @@ export async function POST(request: NextRequest) {
       ${title},
       ${slug},
       ${description},
+      ${categoryId || null},
       ${level},
       ${Number.isFinite(lessons) ? lessons : 1},
       ${duration},
