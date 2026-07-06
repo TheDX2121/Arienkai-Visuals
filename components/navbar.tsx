@@ -4,17 +4,25 @@ import { currentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NameWithBadge } from "@/components/user-plan-badge";
 
-const links = [
-  { href: "/", label: "Home" },
-  { href: "/explore", label: "Explore" },
-  { href: "/courses", label: "Courses" },
-  { href: "/materials", label: "Materials" },
-  { href: "/news", label: "News" },
-  { href: "/premium", label: "Premium" }
-];
-
 type SubscriptionRow = {
   subscription: string | null;
+};
+
+type SiteSetting = {
+  key: string;
+  value: string;
+};
+
+type NavbarLink = {
+  label: string;
+  href: string;
+};
+
+const fallbackNavbar = {
+  logoUrl: "/brand/arienkai-logo.png",
+  links: "Home|/,Explore|/explore,Courses|/courses,Materials|/materials,News|/news,Premium|/premium",
+  showUpload: "true",
+  showCreateAccount: "true"
 };
 
 async function getUserSubscription(userId?: string) {
@@ -34,16 +42,68 @@ async function getUserSubscription(userId?: string) {
   }
 }
 
+async function getNavbarSettings() {
+  try {
+    const settings = await prisma.$queryRaw<SiteSetting[]>`
+      SELECT
+        "key",
+        "value"
+      FROM "SiteSetting"
+      WHERE "key" IN (
+        'navbar_logo_url',
+        'navbar_links',
+        'navbar_show_upload',
+        'navbar_show_create_account'
+      )
+    `;
+
+    const map = new Map(settings.map((setting) => [setting.key, setting.value]));
+
+    return {
+      logoUrl: map.get("navbar_logo_url") || fallbackNavbar.logoUrl,
+      links: map.get("navbar_links") || fallbackNavbar.links,
+      showUpload: map.get("navbar_show_upload") || fallbackNavbar.showUpload,
+      showCreateAccount:
+        map.get("navbar_show_create_account") || fallbackNavbar.showCreateAccount
+    };
+  } catch {
+    return fallbackNavbar;
+  }
+}
+
+function parseNavbarLinks(value: string): NavbarLink[] {
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .map((item) => {
+      const [label, href] = item.split("|").map((part) => part.trim());
+
+      return {
+        label: label || "Link",
+        href: href || "/"
+      };
+    });
+}
+
 export async function Navbar() {
   const user = await currentUser();
-  const subscription = await getUserSubscription(user?.id);
+
+  const [subscription, settings] = await Promise.all([
+    getUserSubscription(user?.id),
+    getNavbarSettings()
+  ]);
+
+  const links = parseNavbarLinks(settings.links);
+  const showUpload = settings.showUpload === "true";
+  const showCreateAccount = settings.showCreateAccount === "true";
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-surface/78 backdrop-blur-xl">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link href="/" className="group flex items-center">
           <img
-            src="/brand/arienkai-logo.png"
+            src={settings.logoUrl}
             alt="Arienkai"
             className="h-11 w-11 rounded-xl object-contain"
           />
@@ -52,7 +112,7 @@ export async function Navbar() {
         <div className="hidden items-center gap-5 md:flex">
           {links.map((link) => (
             <Link
-              key={link.href}
+              key={`${link.label}-${link.href}`}
               href={link.href}
               className="text-sm font-medium text-white/68 transition hover:text-white"
             >
@@ -64,9 +124,11 @@ export async function Navbar() {
         <div className="flex flex-1 items-center justify-end gap-3">
           <SearchBox />
 
-          <Link href="/upload" className="secondary-button hidden sm:inline-flex">
-            Upload
-          </Link>
+          {showUpload ? (
+            <Link href="/upload" className="secondary-button hidden sm:inline-flex">
+              Upload
+            </Link>
+          ) : null}
 
           {user ? (
             <>
@@ -90,9 +152,11 @@ export async function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/signup" className="secondary-button hidden sm:inline-flex">
-                Create account
-              </Link>
+              {showCreateAccount ? (
+                <Link href="/signup" className="secondary-button hidden sm:inline-flex">
+                  Create account
+                </Link>
+              ) : null}
 
               <Link href="/login" className="primary-button">
                 Sign in
