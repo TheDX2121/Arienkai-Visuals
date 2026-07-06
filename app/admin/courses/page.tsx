@@ -19,6 +19,7 @@ type DbCourse = {
   lessons: number;
   duration: string;
   gradient: string;
+  thumbnailUrl: string | null;
   isPremium: boolean;
   createdAt: Date;
 };
@@ -46,6 +47,7 @@ async function getCourses() {
         "lessons",
         "duration",
         "gradient",
+        "thumbnailUrl",
         "isPremium",
         "createdAt"
       FROM "Course"
@@ -167,7 +169,18 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
           <label className="mb-2 mt-5 block text-sm font-bold">Duration</label>
           <input className="input" name="duration" placeholder="3h 20m" defaultValue="1h" />
 
-          <label className="mb-2 mt-5 block text-sm font-bold">Card gradient</label>
+          <label className="mb-2 mt-5 block text-sm font-bold">Thumbnail image URL</label>
+          <input
+            className="input"
+            name="thumbnailUrl"
+            placeholder="https://example.com/course-thumbnail.jpg"
+          />
+
+          <p className="mt-2 text-xs text-white/40">
+            Paste a Cloudinary image URL or any direct image URL. If empty, gradient will be used.
+          </p>
+
+          <label className="mb-2 mt-5 block text-sm font-bold">Card gradient backup</label>
           <select className="input" name="gradient" defaultValue="from-red-700 via-black to-purple-900">
             <option value="from-red-700 via-black to-purple-900">Red / Black / Purple</option>
             <option value="from-blue-700 via-black to-cyan-900">Blue / Black / Cyan</option>
@@ -217,15 +230,40 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
                     </Link>
                   </div>
 
+                  {course.thumbnailUrl ? (
+                    <div className="mt-5 overflow-hidden rounded-2xl">
+                      <img
+                        src={course.thumbnailUrl}
+                        alt={course.title}
+                        className="h-44 w-full object-cover"
+                      />
+                    </div>
+                  ) : null}
+
                   <details className="mt-5 rounded-2xl bg-white/5 p-4">
                     <summary className="cursor-pointer font-black">Edit course</summary>
 
                     <form action={`/api/admin/courses/${course.id}/update`} method="post" className="mt-4 grid gap-4">
                       <input className="input" name="title" defaultValue={course.title} required />
-                      <textarea className="input min-h-24" name="description" defaultValue={course.description} required />
+
+                      <textarea
+                        className="input min-h-24"
+                        name="description"
+                        defaultValue={course.description}
+                        required
+                      />
+
                       <input className="input" name="level" defaultValue={course.level} required />
                       <input className="input" name="lessons" type="number" min="1" defaultValue={course.lessons} />
                       <input className="input" name="duration" defaultValue={course.duration} />
+
+                      <input
+                        className="input"
+                        name="thumbnailUrl"
+                        defaultValue={course.thumbnailUrl || ""}
+                        placeholder="Thumbnail image URL"
+                      />
+
                       <input className="input" name="gradient" defaultValue={course.gradient} />
 
                       <label className="flex items-center gap-3 text-sm font-bold">
@@ -244,8 +282,19 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
 
                     <form action={`/api/admin/courses/${course.id}/lessons`} method="post" className="mt-4 grid gap-4">
                       <input className="input" name="title" placeholder="Lesson title" required />
-                      <textarea className="input min-h-20" name="description" placeholder="Lesson notes / description" />
-                      <input className="input" name="videoUrl" placeholder="Video URL, optional" />
+
+                      <textarea
+                        className="input min-h-20"
+                        name="description"
+                        placeholder="Lesson notes / description"
+                      />
+
+                      <input
+                        className="input"
+                        name="videoUrl"
+                        placeholder="Video URL, optional"
+                      />
+
                       <input className="input" name="duration" placeholder="10 min" defaultValue="10 min" />
                       <input className="input" name="order" type="number" min="1" defaultValue={courseLessons.length + 1} />
 
