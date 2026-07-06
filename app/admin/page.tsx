@@ -30,9 +30,9 @@ export default async function AdminPage() {
       description: "Add, edit, delete course and material categories."
     },
     {
-      title: "Footer",
-      href: "/admin/footer",
-      description: "Edit footer brand, description, and links."
+      title: "News",
+      href: "/admin/news",
+      description: "Add, edit, delete anime and creator news."
     },
     {
       title: "Users",
@@ -40,9 +40,9 @@ export default async function AdminPage() {
       description: "Manage users, roles, premium plans, posts, followers, and moderation."
     },
     {
-      title: "News",
-      href: "/admin",
-      description: "Coming next: anime and creator news."
+      title: "Footer",
+      href: "/admin/footer",
+      description: "Edit footer brand, description, and links."
     }
   ];
 
