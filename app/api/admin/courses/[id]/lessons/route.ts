@@ -9,11 +9,17 @@ export async function POST(
   const user = await currentUser();
 
   if (!user) {
-    return NextResponse.redirect(new URL("/login?next=/admin/courses", request.url), { status: 303 });
+    return NextResponse.redirect(
+      new URL("/login?next=/admin/courses", request.url),
+      { status: 303 }
+    );
   }
 
   if (user.role !== "ADMIN") {
-    return NextResponse.redirect(new URL("/", request.url), { status: 303 });
+    return NextResponse.redirect(
+      new URL("/", request.url),
+      { status: 303 }
+    );
   }
 
   const { id: courseId } = await context.params;
@@ -28,7 +34,10 @@ export async function POST(
   const isPreview = formData.get("isPreview") === "on";
 
   if (!title) {
-    return NextResponse.redirect(new URL("/admin/courses?error=missing-lesson-title", request.url), { status: 303 });
+    return NextResponse.redirect(
+      new URL("/admin/courses?error=missing-lesson-title", request.url),
+      { status: 303 }
+    );
   }
 
   const lessonId = `lesson_${courseId}_${Date.now()}`;
@@ -66,5 +75,8 @@ export async function POST(
     WHERE "id" = ${courseId}
   `;
 
-  return NextResponse.redirect(new URL("/admin/courses?success=lesson-created", request.url), { status: 303 });
+  return NextResponse.redirect(
+    new URL("/admin/courses?success=lesson-created", request.url),
+    { status: 303 }
+  );
 }
