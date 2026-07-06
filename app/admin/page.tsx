@@ -27,7 +27,7 @@ export default async function AdminPage() {
     {
       title: "Footer",
       href: "/admin/footer",
-      description: "Coming next: edit website footer text and links."
+      description: "Edit footer brand, description, and links."
     },
     {
       title: "Materials",
