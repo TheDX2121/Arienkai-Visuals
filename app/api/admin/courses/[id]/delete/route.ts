@@ -9,11 +9,17 @@ export async function POST(
   const user = await currentUser();
 
   if (!user) {
-    return NextResponse.redirect(new URL("/login?next=/admin/courses", request.url), { status: 303 });
+    return NextResponse.redirect(
+      new URL("/login?next=/admin/courses", request.url),
+      { status: 303 }
+    );
   }
 
   if (user.role !== "ADMIN") {
-    return NextResponse.redirect(new URL("/", request.url), { status: 303 });
+    return NextResponse.redirect(
+      new URL("/", request.url),
+      { status: 303 }
+    );
   }
 
   const { id } = await context.params;
@@ -23,5 +29,8 @@ export async function POST(
     WHERE "id" = ${id}
   `;
 
-  return NextResponse.redirect(new URL("/admin/courses?success=course-deleted", request.url), { status: 303 });
+  return NextResponse.redirect(
+    new URL("/admin/courses?success=course-deleted", request.url),
+    { status: 303 }
+  );
 }
