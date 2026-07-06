@@ -33,6 +33,8 @@ export async function POST(
   const thumbnailUrl = String(formData.get("thumbnailUrl") || "").trim();
   const gradient = String(formData.get("gradient") || "from-red-700 via-black to-purple-900").trim();
   const isPremium = formData.get("isPremium") === "on";
+  const priceInr = Number(formData.get("priceInr") || 0);
+  const purchaseUrl = String(formData.get("purchaseUrl") || "").trim();
 
   if (!title || !description) {
     return NextResponse.redirect(
@@ -51,7 +53,9 @@ export async function POST(
       "duration" = ${duration},
       "gradient" = ${gradient},
       "thumbnailUrl" = ${thumbnailUrl || null},
-      "isPremium" = ${isPremium}
+      "isPremium" = ${isPremium},
+      "priceInr" = ${Number.isFinite(priceInr) ? priceInr : 0},
+      "purchaseUrl" = ${purchaseUrl || null}
     WHERE "id" = ${id}
   `;
 
