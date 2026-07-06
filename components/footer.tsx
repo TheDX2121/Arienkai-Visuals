@@ -13,6 +13,7 @@ type FooterLink = {
 
 async function getFooterSettings() {
   const fallback = {
+    logoUrl: "/brand/arienkai-logo.png",
     brand: "Arienkai Visuals",
     description:
       "A creator-first streaming platform for editing tutorials, anime artwork, premium courses, GFX assets, preview ratings, and designer discovery.",
@@ -27,6 +28,8 @@ async function getFooterSettings() {
         "value"
       FROM "SiteSetting"
       WHERE "key" IN (
+        'footer_logo_url',
+        'navbar_logo_url',
         'footer_brand',
         'footer_description',
         'footer_create_links',
@@ -37,6 +40,10 @@ async function getFooterSettings() {
     const map = new Map(settings.map((setting) => [setting.key, setting.value]));
 
     return {
+      logoUrl:
+        map.get("footer_logo_url") ||
+        map.get("navbar_logo_url") ||
+        fallback.logoUrl,
       brand: map.get("footer_brand") || fallback.brand,
       description: map.get("footer_description") || fallback.description,
       createLinks: map.get("footer_create_links") || fallback.createLinks,
@@ -73,9 +80,11 @@ export async function Footer() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.4fr_.6fr_.6fr] lg:px-8">
         <div>
           <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand font-black shadow-glow">
-              A
-            </span>
+            <img
+              src={settings.logoUrl}
+              alt={settings.brand}
+              className="h-12 w-12 rounded-xl object-contain"
+            />
 
             <span className="text-sm font-black uppercase tracking-[0.22em]">
               {settings.brand}
