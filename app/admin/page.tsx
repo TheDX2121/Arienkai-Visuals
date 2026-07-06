@@ -115,38 +115,10 @@ export default async function AdminPage() {
 
         <p className="mt-3 text-sm text-white/40">
           Logged in as @{user.username}
-        </p>
-      </div>
-
-      <details className="glass-panel rounded-[2rem] p-5" open>
-        <summary className="cursor-pointer text-xl font-black">
-          ☰ Admin Menu
-        </summary>
-
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {sections.map((section) => (
-            <Link
-              key={section.title}
-              href={section.href}
-              className="card-hover rounded-[1.5rem] bg-white/5 p-5 transition hover:bg-white/10"
-            >
-              <h2 className="text-2xl font-black">
-                {section.title}
-              </h2>
-
-              <p className="mt-3 text-sm leading-6 text-white/55">
-                {section.description}
-              </p>
-            </Link>
-          ))}
-        </div>
-      </details>
-    </section>
-  );
-      }
-
-
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { currentUser } from "@/lib/auth";
+s-2 lg:grid-cols-3">
           {sections.map((section) => (
             <Link
               key={section.title}
