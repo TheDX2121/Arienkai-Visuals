@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { currentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { CloudinaryUploadField } from "@/components/cloudinary-upload-field";
 
 type FooterPageProps = {
   searchParams: Promise<{
@@ -17,6 +18,7 @@ type SiteSetting = {
 
 async function getFooterSettings() {
   const fallback = {
+    logoUrl: "/brand/arienkai-logo.png",
     brand: "Arienkai Visuals",
     description:
       "A creator-first streaming platform for editing tutorials, anime artwork, premium courses, GFX assets, preview ratings, and designer discovery.",
@@ -31,6 +33,8 @@ async function getFooterSettings() {
         "value"
       FROM "SiteSetting"
       WHERE "key" IN (
+        'footer_logo_url',
+        'navbar_logo_url',
         'footer_brand',
         'footer_description',
         'footer_create_links',
@@ -41,6 +45,10 @@ async function getFooterSettings() {
     const map = new Map(settings.map((setting) => [setting.key, setting.value]));
 
     return {
+      logoUrl:
+        map.get("footer_logo_url") ||
+        map.get("navbar_logo_url") ||
+        fallback.logoUrl,
       brand: map.get("footer_brand") || fallback.brand,
       description: map.get("footer_description") || fallback.description,
       createLinks: map.get("footer_create_links") || fallback.createLinks,
@@ -81,8 +89,16 @@ export default async function AdminFooterPage({ searchParams }: FooterPageProps)
             Courses
           </Link>
 
-          <Link href="/admin/categories" className="secondary-button">
-            Categories
+          <Link href="/admin/materials" className="secondary-button">
+            Materials
+          </Link>
+
+          <Link href="/admin/news" className="secondary-button">
+            News
+          </Link>
+
+          <Link href="/admin/navbar" className="secondary-button">
+            Navbar
           </Link>
 
           <Link href="/admin/footer" className="primary-button">
@@ -99,7 +115,7 @@ export default async function AdminFooterPage({ searchParams }: FooterPageProps)
         </h1>
 
         <p className="mt-3 text-white/55">
-          Change the footer brand, description, and footer links from here.
+          Change footer logo, brand name, description, and links.
         </p>
       </div>
 
@@ -120,7 +136,20 @@ export default async function AdminFooterPage({ searchParams }: FooterPageProps)
         method="post"
         className="glass-panel rounded-[2rem] p-6"
       >
-        <label className="mb-2 block text-sm font-bold">
+        <CloudinaryUploadField
+          name="logoUrl"
+          label="Footer logo"
+          defaultValue={settings.logoUrl}
+          resourceType="image"
+          buttonText="Upload logo"
+          placeholder="Paste logo link or code path like /brand/arienkai-logo.png"
+        />
+
+        <p className="mt-2 text-xs text-white/40">
+          You can upload a logo, paste a Cloudinary URL, or paste a code path like /brand/arienkai-logo.png.
+        </p>
+
+        <label className="mb-2 mt-5 block text-sm font-bold">
           Footer brand name
         </label>
 
@@ -192,7 +221,18 @@ export default async function AdminFooterPage({ searchParams }: FooterPageProps)
 
         <div className="mt-5 grid gap-6 md:grid-cols-3">
           <div>
-            <div className="font-black">{settings.brand}</div>
+            <div className="flex items-center gap-3">
+              <img
+                src={settings.logoUrl}
+                alt="Footer logo preview"
+                className="h-12 w-12 rounded-xl object-contain"
+              />
+
+              <div className="font-black">
+                {settings.brand}
+              </div>
+            </div>
+
             <p className="mt-3 text-sm leading-6 text-white/55">
               {settings.description}
             </p>
@@ -200,6 +240,7 @@ export default async function AdminFooterPage({ searchParams }: FooterPageProps)
 
           <div>
             <div className="font-black">Create</div>
+
             <p className="mt-3 whitespace-pre-line text-sm text-white/55">
               {settings.createLinks}
             </p>
@@ -207,6 +248,7 @@ export default async function AdminFooterPage({ searchParams }: FooterPageProps)
 
           <div>
             <div className="font-black">Platform</div>
+
             <p className="mt-3 whitespace-pre-line text-sm text-white/55">
               {settings.platformLinks}
             </p>
