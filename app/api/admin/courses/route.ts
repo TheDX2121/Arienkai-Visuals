@@ -39,6 +39,8 @@ export async function POST(request: NextRequest) {
     formData.get("gradient") || "from-red-700 via-black to-purple-900"
   ).trim();
   const isPremium = formData.get("isPremium") === "on";
+  const priceInr = Number(formData.get("priceInr") || 0);
+  const purchaseUrl = String(formData.get("purchaseUrl") || "").trim();
 
   if (!title || !description) {
     return NextResponse.redirect(
@@ -62,6 +64,8 @@ export async function POST(request: NextRequest) {
       "gradient",
       "thumbnailUrl",
       "isPremium",
+      "priceInr",
+      "purchaseUrl",
       "createdAt"
     )
     VALUES (
@@ -75,6 +79,8 @@ export async function POST(request: NextRequest) {
       ${gradient},
       ${thumbnailUrl || null},
       ${isPremium},
+      ${Number.isFinite(priceInr) ? priceInr : 0},
+      ${purchaseUrl || null},
       NOW()
     )
   `;
