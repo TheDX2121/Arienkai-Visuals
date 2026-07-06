@@ -29,6 +29,8 @@ export async function POST(
   const description = String(formData.get("description") || "").trim();
   const videoUrlRaw = String(formData.get("videoUrl") || "").trim();
   const videoUrl = videoUrlRaw || null;
+  const captionsUrlRaw = String(formData.get("captionsUrl") || "").trim();
+  const captionsUrl = captionsUrlRaw || null;
   const duration = String(formData.get("duration") || "10 min").trim();
   const order = Number(formData.get("order") || 1);
   const isPreview = formData.get("isPreview") === "on";
@@ -49,6 +51,7 @@ export async function POST(
       "title",
       "description",
       "videoUrl",
+      "captionsUrl",
       "duration",
       "order",
       "isPreview",
@@ -60,6 +63,7 @@ export async function POST(
       ${title},
       ${description},
       ${videoUrl},
+      ${captionsUrl},
       ${duration},
       ${Number.isFinite(order) ? order : 1},
       ${isPreview},
