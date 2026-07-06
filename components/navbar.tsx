@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SearchBox } from "@/components/search-box";
 import { currentUser } from "@/lib/auth";
+import { NameWithBadge } from "@/components/user-plan-badge";
 
 const links = [
   { href: "/", label: "Home" },
@@ -17,9 +18,11 @@ export async function Navbar() {
     <header className="sticky top-0 z-50 border-b border-white/10 bg-surface/78 backdrop-blur-xl">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link href="/" className="group flex items-center gap-3">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand font-black shadow-glow transition group-hover:rotate-3">
-            A
-          </span>
+          <img
+            src="/brand/arienkai-logo.png"
+            alt="Arienkai"
+            className="h-10 w-10 rounded-xl object-contain"
+          />
 
           <span className="hidden text-sm font-black uppercase tracking-[0.22em] sm:inline">
             Arienkai
@@ -41,32 +44,40 @@ export async function Navbar() {
         <div className="flex flex-1 items-center justify-end gap-3">
           <SearchBox />
 
+          <Link href="/upload" className="secondary-button hidden sm:inline-flex">
+            Upload
+          </Link>
+
           {user ? (
             <>
-              <Link href="/upload" className="secondary-button hidden sm:inline-flex">
-                Upload
-              </Link>
-
-              <Link href={`/profile/${user.username}`} className="secondary-button">
-                @{user.username}
-              </Link>
-
               {user.role === "ADMIN" ? (
                 <Link href="/admin" className="secondary-button hidden sm:inline-flex">
                   Admin
                 </Link>
               ) : null}
 
-              <form action="/api/auth/logout" method="post">
-                <button className="primary-button" type="submit">
+              <Link href={`/profile/${user.username}`} className="primary-button">
+                <NameWithBadge subscription={user.subscription}>
+                  @{user.username}
+                </NameWithBadge>
+              </Link>
+
+              <form action="/api/auth/logout" method="post" className="hidden sm:block">
+                <button className="secondary-button" type="submit">
                   Logout
                 </button>
               </form>
             </>
           ) : (
-            <Link href="/login" className="primary-button">
-              Sign in
-            </Link>
+            <>
+              <Link href="/signup" className="secondary-button hidden sm:inline-flex">
+                Create account
+              </Link>
+
+              <Link href="/login" className="primary-button">
+                Sign in
+              </Link>
+            </>
           )}
         </div>
       </nav>
