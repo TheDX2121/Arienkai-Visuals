@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
   if (!user) {
     return NextResponse.redirect(
-      new URL("/login?next=/admin", request.url),
+      new URL("/login?next=/admin/courses", request.url),
       { status: 303 }
     );
   }
@@ -41,13 +41,13 @@ export async function POST(request: NextRequest) {
 
   if (!title || !description) {
     return NextResponse.redirect(
-      new URL("/admin?error=missing-course-fields", request.url),
+      new URL("/admin/courses?error=missing-course-fields", request.url),
       { status: 303 }
     );
   }
 
-  const slug = slugify(title);
-  const id = `course_${slug}_${Date.now()}`;
+  const slug = `${slugify(title)}-${Date.now()}`;
+  const id = `course_${slug}`;
 
   await prisma.$executeRaw`
     INSERT INTO "Course" (
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
   `;
 
   return NextResponse.redirect(
-    new URL("/admin?success=course-created", request.url),
+    new URL("/admin/courses?success=course-created", request.url),
     { status: 303 }
   );
 }
