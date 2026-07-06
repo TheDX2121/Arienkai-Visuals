@@ -20,6 +20,7 @@ export async function Navbar() {
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand font-black shadow-glow transition group-hover:rotate-3">
             A
           </span>
+
           <span className="hidden text-sm font-black uppercase tracking-[0.22em] sm:inline">
             Arienkai
           </span>
@@ -27,7 +28,11 @@ export async function Navbar() {
 
         <div className="hidden items-center gap-5 md:flex">
           {links.map((link) => (
-            <Link key={link.href} href={link.href} className="text-sm font-medium text-white/68 transition hover:text-white">
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-sm font-medium text-white/68 transition hover:text-white"
+            >
               {link.label}
             </Link>
           ))}
@@ -45,6 +50,12 @@ export async function Navbar() {
               <Link href={`/profile/${user.username}`} className="secondary-button">
                 @{user.username}
               </Link>
+
+              {user.role === "ADMIN" ? (
+                <Link href="/admin" className="secondary-button hidden sm:inline-flex">
+                  Admin
+                </Link>
+              ) : null}
 
               <form action="/api/auth/logout" method="post">
                 <button className="primary-button" type="submit">
