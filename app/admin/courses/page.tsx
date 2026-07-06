@@ -22,6 +22,8 @@ type DbCourse = {
   gradient: string;
   thumbnailUrl: string | null;
   isPremium: boolean;
+  priceInr: number;
+  purchaseUrl: string | null;
   createdAt: Date;
 };
 
@@ -31,6 +33,7 @@ type DbLesson = {
   title: string;
   description: string;
   videoUrl: string | null;
+  captionsUrl: string | null;
   duration: string;
   order: number;
   isPreview: boolean;
@@ -50,6 +53,8 @@ async function getCourses() {
         "gradient",
         "thumbnailUrl",
         "isPremium",
+        "priceInr",
+        "purchaseUrl",
         "createdAt"
       FROM "Course"
       ORDER BY "createdAt" DESC
@@ -68,6 +73,7 @@ async function getLessons() {
         "title",
         "description",
         "videoUrl",
+        "captionsUrl",
         "duration",
         "order",
         "isPreview"
@@ -128,7 +134,7 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
         </h1>
 
         <p className="mt-3 text-white/55">
-          Upload thumbnails and lesson videos directly to Cloudinary, or paste URLs manually.
+          Upload thumbnails and lesson videos to Cloudinary, paste URLs manually, and manage premium courses.
         </p>
       </div>
 
@@ -247,6 +253,28 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
             Premium course
           </label>
 
+          <label className="mb-2 mt-5 block text-sm font-bold">
+            Price in INR
+          </label>
+
+          <input
+            className="input"
+            name="priceInr"
+            type="number"
+            min="0"
+            defaultValue="0"
+          />
+
+          <label className="mb-2 mt-5 block text-sm font-bold">
+            Purchase link
+          </label>
+
+          <input
+            className="input"
+            name="purchaseUrl"
+            placeholder="Paste Razorpay Payment Link or premium page URL"
+          />
+
           <button className="primary-button mt-6 w-full justify-center" type="submit">
             Publish course
           </button>
@@ -271,12 +299,12 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
 
                       <div className="mt-3 flex flex-wrap gap-2 text-xs text-white/45">
                         <span className="pill">{course.level}</span>
-                        <span className="pill">{courseLessons.length} lessons added</span>
+                        <span className="pill">{courseLessons.length} lessons</span>
                         <span className="pill">{course.duration}</span>
 
                         {course.isPremium ? (
                           <span className="pill bg-gold/20 text-yellow-100">
-                            Premium
+                            Premium {course.priceInr ? `₹${course.priceInr}` : ""}
                           </span>
                         ) : (
                           <span className="pill">Free</span>
@@ -288,16 +316,6 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
                       View
                     </Link>
                   </div>
-
-                  {course.thumbnailUrl ? (
-                    <div className="mt-5 overflow-hidden rounded-2xl">
-                      <img
-                        src={course.thumbnailUrl}
-                        alt={course.title}
-                        className="h-44 w-full object-cover"
-                      />
-                    </div>
-                  ) : null}
 
                   <details className="mt-5 rounded-2xl bg-white/5 p-4">
                     <summary className="cursor-pointer font-black">
@@ -368,6 +386,21 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
                         Premium course
                       </label>
 
+                      <input
+                        className="input"
+                        name="priceInr"
+                        type="number"
+                        min="0"
+                        defaultValue={course.priceInr}
+                      />
+
+                      <input
+                        className="input"
+                        name="purchaseUrl"
+                        defaultValue={course.purchaseUrl || ""}
+                        placeholder="Purchase link"
+                      />
+
                       <button className="primary-button w-fit" type="submit">
                         Save changes
                       </button>
@@ -376,7 +409,7 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
 
                   <details className="mt-4 rounded-2xl bg-white/5 p-4">
                     <summary className="cursor-pointer font-black">
-                      Lessons
+                      Add lesson
                     </summary>
 
                     <form
@@ -394,7 +427,7 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
                       <textarea
                         className="input min-h-20"
                         name="description"
-                        placeholder="Lesson notes / description"
+                        placeholder="Lesson notes / description. Links will be clickable."
                       />
 
                       <CloudinaryUploadField
@@ -403,6 +436,12 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
                         resourceType="video"
                         buttonText="Upload video"
                         placeholder="Paste lesson video URL or upload video"
+                      />
+
+                      <input
+                        className="input"
+                        name="captionsUrl"
+                        placeholder="Captions VTT URL, optional"
                       />
 
                       <input
@@ -433,37 +472,103 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
                         Add lesson
                       </button>
                     </form>
-
-                    <div className="mt-5 grid gap-2">
-                      {courseLessons.length ? (
-                        courseLessons.map((lesson) => (
-                          <div key={lesson.id} className="rounded-2xl bg-black/25 p-3">
-                            <div className="font-bold">
-                              {lesson.order}. {lesson.title}
-                            </div>
-
-                            <div className="mt-1 text-xs text-white/45">
-                              {lesson.duration} · {lesson.isPreview ? "Preview" : "Locked"}
-                            </div>
-
-                            {lesson.videoUrl ? (
-                              <div className="mt-1 break-all text-xs text-white/30">
-                                Video added
-                              </div>
-                            ) : (
-                              <div className="mt-1 text-xs text-white/30">
-                                No video yet
-                              </div>
-                            )}
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-sm text-white/45">
-                          No lessons added yet.
-                        </p>
-                      )}
-                    </div>
                   </details>
+
+                  <div className="mt-4 grid gap-3">
+                    {courseLessons.length ? (
+                      courseLessons.map((lesson) => (
+                        <details key={lesson.id} className="rounded-2xl bg-black/25 p-4">
+                          <summary className="cursor-pointer font-bold">
+                            {lesson.order}. {lesson.title}
+                          </summary>
+
+                          <div className="mt-2 text-xs text-white/45">
+                            {lesson.duration} · {lesson.isPreview ? "Preview" : "Premium/Locked"} · {lesson.videoUrl ? "Video added" : "No video"} · {lesson.captionsUrl ? "Captions added" : "No captions"}
+                          </div>
+
+                          <form
+                            action={`/api/admin/courses/${course.id}/lessons/${lesson.id}/update`}
+                            method="post"
+                            className="mt-4 grid gap-4"
+                          >
+                            <input
+                              className="input"
+                              name="title"
+                              defaultValue={lesson.title}
+                              required
+                            />
+
+                            <textarea
+                              className="input min-h-20"
+                              name="description"
+                              defaultValue={lesson.description}
+                              placeholder="Lesson notes / description"
+                            />
+
+                            <CloudinaryUploadField
+                              name="videoUrl"
+                              label="Lesson video"
+                              defaultValue={lesson.videoUrl}
+                              resourceType="video"
+                              buttonText="Upload video"
+                              placeholder="Paste lesson video URL or upload video"
+                            />
+
+                            <input
+                              className="input"
+                              name="captionsUrl"
+                              defaultValue={lesson.captionsUrl || ""}
+                              placeholder="Captions VTT URL, optional"
+                            />
+
+                            <input
+                              className="input"
+                              name="duration"
+                              defaultValue={lesson.duration}
+                            />
+
+                            <input
+                              className="input"
+                              name="order"
+                              type="number"
+                              min="1"
+                              defaultValue={lesson.order}
+                            />
+
+                            <label className="flex items-center gap-3 text-sm font-bold">
+                              <input
+                                name="isPreview"
+                                type="checkbox"
+                                defaultChecked={lesson.isPreview}
+                              />
+                              Preview lesson
+                            </label>
+
+                            <button className="primary-button w-fit" type="submit">
+                              Save lesson
+                            </button>
+                          </form>
+
+                          <form
+                            action={`/api/admin/courses/${course.id}/lessons/${lesson.id}/delete`}
+                            method="post"
+                            className="mt-3"
+                          >
+                            <button
+                              className="rounded-full border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-100"
+                              type="submit"
+                            >
+                              Delete lesson
+                            </button>
+                          </form>
+                        </details>
+                      ))
+                    ) : (
+                      <p className="text-sm text-white/45">
+                        No lessons added yet.
+                      </p>
+                    )}
+                  </div>
 
                   <form
                     action={`/api/admin/courses/${course.id}/delete`}
