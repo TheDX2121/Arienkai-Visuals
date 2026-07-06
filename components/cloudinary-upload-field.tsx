@@ -13,6 +13,7 @@ type CloudinaryUploadFieldProps = {
   placeholder: string;
   allowedFormats?: string[];
   maxFileSizeBytes?: number;
+  required?: boolean;
 };
 
 type CloudinaryWidgetResult = {
@@ -89,7 +90,8 @@ export function CloudinaryUploadField({
   buttonText,
   placeholder,
   allowedFormats,
-  maxFileSizeBytes
+  maxFileSizeBytes,
+  required = false
 }: CloudinaryUploadFieldProps) {
   const [value, setValue] = useState(defaultValue || "");
   const [isReady, setIsReady] = useState(false);
@@ -172,7 +174,7 @@ export function CloudinaryUploadField({
           value={value}
           onChange={(event) => setValue(event.target.value)}
           placeholder={placeholder}
-          required
+          required={required}
         />
 
         <button
