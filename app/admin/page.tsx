@@ -22,12 +22,12 @@ export default async function AdminPage() {
     {
       title: "Materials",
       href: "/admin/materials",
-      description: "Add, edit, delete downloadable materials."
+      description: "Add, edit, delete GFX packs, files, presets, PSDs, and downloads."
     },
     {
       title: "Categories",
       href: "/admin/categories",
-      description: "Add, edit, delete categories."
+      description: "Add, edit, delete course and material categories."
     },
     {
       title: "Footer",
@@ -64,7 +64,7 @@ export default async function AdminPage() {
         </p>
       </div>
 
-      <details className="glass-panel rounded-[2rem] p-5">
+      <details className="glass-panel rounded-[2rem] p-5" open>
         <summary className="cursor-pointer text-xl font-black">
           ☰ Admin Menu
         </summary>
