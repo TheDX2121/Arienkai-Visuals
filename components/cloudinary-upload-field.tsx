@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type ResourceType = "image" | "video" | "raw";
+type ResourceType = "image" | "video" | "raw" | "auto";
 
 type CloudinaryUploadFieldProps = {
   name: string;
@@ -44,6 +44,10 @@ function defaultAllowedFormats(resourceType: ResourceType) {
     return ["mp4", "mov", "webm"];
   }
 
+  if (resourceType === "auto") {
+    return ["jpg", "jpeg", "png", "webp", "mp4", "mov", "webm"];
+  }
+
   return [
     "vtt",
     "pdf",
@@ -67,6 +71,10 @@ function defaultMaxFileSize(resourceType: ResourceType) {
   }
 
   if (resourceType === "video") {
+    return 500000000;
+  }
+
+  if (resourceType === "auto") {
     return 500000000;
   }
 
@@ -164,6 +172,7 @@ export function CloudinaryUploadField({
           value={value}
           onChange={(event) => setValue(event.target.value)}
           placeholder={placeholder}
+          required
         />
 
         <button
