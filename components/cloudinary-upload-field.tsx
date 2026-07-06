@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type ResourceType = "image" | "video";
+type ResourceType = "image" | "video" | "raw";
 
 type CloudinaryUploadFieldProps = {
   name: string;
@@ -31,6 +31,30 @@ declare global {
       };
     };
   }
+}
+
+function allowedFormats(resourceType: ResourceType) {
+  if (resourceType === "image") {
+    return ["jpg", "jpeg", "png", "webp"];
+  }
+
+  if (resourceType === "video") {
+    return ["mp4", "mov", "webm"];
+  }
+
+  return ["vtt"];
+}
+
+function maxFileSize(resourceType: ResourceType) {
+  if (resourceType === "image") {
+    return 10000000;
+  }
+
+  if (resourceType === "video") {
+    return 500000000;
+  }
+
+  return 5000000;
 }
 
 export function CloudinaryUploadField({
@@ -90,11 +114,8 @@ export function CloudinaryUploadField({
         resourceType,
         multiple: false,
         sources: ["local", "url"],
-        clientAllowedFormats:
-          resourceType === "image"
-            ? ["jpg", "jpeg", "png", "webp"]
-            : ["mp4", "mov", "webm"],
-        maxFileSize: resourceType === "image" ? 10000000 : 500000000
+        clientAllowedFormats: allowedFormats(resourceType),
+        maxFileSize: maxFileSize(resourceType)
       },
       (error, result) => {
         if (error) {
