@@ -20,19 +20,19 @@ export default async function AdminPage() {
       description: "Add, edit, delete courses and lessons."
     },
     {
+      title: "Materials",
+      href: "/admin/materials",
+      description: "Add, edit, delete downloadable materials."
+    },
+    {
       title: "Categories",
       href: "/admin/categories",
-      description: "Add, edit, delete course categories."
+      description: "Add, edit, delete categories."
     },
     {
       title: "Footer",
       href: "/admin/footer",
       description: "Edit footer brand, description, and links."
-    },
-    {
-      title: "Materials",
-      href: "/admin",
-      description: "Coming later: GFX packs, overlays, presets, and files."
     },
     {
       title: "News",
