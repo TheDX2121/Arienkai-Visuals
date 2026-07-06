@@ -1,27 +1,121 @@
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
-export function Footer() {
+type SiteSetting = {
+  key: string;
+  value: string;
+};
+
+type FooterLink = {
+  label: string;
+  href: string;
+};
+
+async function getFooterSettings() {
+  const fallback = {
+    brand: "Arienkai Visuals",
+    description:
+      "A creator-first streaming platform for editing tutorials, anime artwork, premium courses, GFX assets, preview ratings, and designer discovery.",
+    createLinks: "Upload post|/upload,Courses|/courses,Materials|/materials",
+    platformLinks: "Premium|/premium,Admin|/admin,Explore|/explore"
+  };
+
+  try {
+    const settings = await prisma.$queryRaw<SiteSetting[]>`
+      SELECT
+        "key",
+        "value"
+      FROM "SiteSetting"
+      WHERE "key" IN (
+        'footer_brand',
+        'footer_description',
+        'footer_create_links',
+        'footer_platform_links'
+      )
+    `;
+
+    const map = new Map(settings.map((setting) => [setting.key, setting.value]));
+
+    return {
+      brand: map.get("footer_brand") || fallback.brand,
+      description: map.get("footer_description") || fallback.description,
+      createLinks: map.get("footer_create_links") || fallback.createLinks,
+      platformLinks: map.get("footer_platform_links") || fallback.platformLinks
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+function parseLinks(value: string): FooterLink[] {
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .map((item) => {
+      const [label, href] = item.split("|").map((part) => part.trim());
+
+      return {
+        label: label || "Link",
+        href: href || "/"
+      };
+    });
+}
+
+export async function Footer() {
+  const settings = await getFooterSettings();
+
+  const createLinks = parseLinks(settings.createLinks);
+  const platformLinks = parseLinks(settings.platformLinks);
+
   return (
     <footer className="border-t border-white/10 bg-black/30">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 text-sm text-white/55 sm:px-6 md:grid-cols-4 lg:px-8">
-        <div className="md:col-span-2">
-          <div className="mb-3 text-lg font-black text-white">Arienkai Visuals</div>
-          <p className="max-w-xl">A creator-first streaming platform for editing tutorials, anime artwork, premium courses, GFX assets, preview ratings, and designer discovery.</p>
-        </div>
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.4fr_.6fr_.6fr] lg:px-8">
         <div>
-          <div className="mb-3 font-bold text-white">Create</div>
-          <div className="grid gap-2">
-            <Link href="/upload">Upload post</Link>
-            <Link href="/courses">Courses</Link>
-            <Link href="/materials">Materials</Link>
+          <div className="flex items-center gap-3">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand font-black shadow-glow">
+              A
+            </span>
+
+            <span className="text-sm font-black uppercase tracking-[0.22em]">
+              {settings.brand}
+            </span>
+          </div>
+
+          <p className="mt-4 max-w-xl text-sm leading-6 text-white/50">
+            {settings.description}
+          </p>
+        </div>
+
+        <div>
+          <h3 className="font-black">Create</h3>
+
+          <div className="mt-4 grid gap-3 text-sm text-white/55">
+            {createLinks.map((link) => (
+              <Link
+                key={`${link.label}-${link.href}`}
+                href={link.href}
+                className="transition hover:text-white"
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
         </div>
+
         <div>
-          <div className="mb-3 font-bold text-white">Platform</div>
-          <div className="grid gap-2">
-            <Link href="/premium">Premium</Link>
-            <Link href="/admin">Admin</Link>
-            <Link href="/explore">Explore</Link>
+          <h3 className="font-black">Platform</h3>
+
+          <div className="mt-4 grid gap-3 text-sm text-white/55">
+            {platformLinks.map((link) => (
+              <Link
+                key={`${link.label}-${link.href}`}
+                href={link.href}
+                className="transition hover:text-white"
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
         </div>
       </div>
