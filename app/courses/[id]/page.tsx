@@ -17,6 +17,7 @@ type DbCourse = {
   lessons: number;
   duration: string;
   gradient: string;
+  thumbnailUrl: string | null;
   isPremium: boolean;
 };
 
@@ -40,6 +41,7 @@ async function getDatabaseCourse(id: string) {
         "lessons",
         "duration",
         "gradient",
+        "thumbnailUrl",
         "isPremium"
       FROM "Course"
       WHERE "id" = ${id}
@@ -90,6 +92,7 @@ export default async function CourseDetailPage({ params }: CourseDetailProps) {
         lessons: dbCourse.lessons,
         duration: dbCourse.duration,
         gradient: dbCourse.gradient,
+        thumbnailUrl: dbCourse.thumbnailUrl,
         premium: dbCourse.isPremium,
         source: "database" as const
       }
@@ -101,6 +104,7 @@ export default async function CourseDetailPage({ params }: CourseDetailProps) {
         lessons: demoCourse!.lessons,
         duration: demoCourse!.duration,
         gradient: demoCourse!.gradient,
+        thumbnailUrl: null,
         premium: false,
         source: "demo" as const
       };
@@ -130,45 +134,57 @@ export default async function CourseDetailPage({ params }: CourseDetailProps) {
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className={`rounded-[2rem] bg-gradient-to-br ${course.gradient} p-8 shadow-card md:p-12`}>
-        <div className="flex flex-wrap gap-2">
-          <span className="pill bg-black/30">{course.level}</span>
+      <div className={`relative overflow-hidden rounded-[2rem] bg-gradient-to-br ${course.gradient} p-8 shadow-card md:p-12`}>
+        {course.thumbnailUrl ? (
+          <img
+            src={course.thumbnailUrl}
+            alt={course.title}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : null}
 
-          {course.premium ? (
-            <span className="pill bg-gold/25 text-yellow-100">Premium</span>
-          ) : (
-            <span className="pill bg-black/30">Free</span>
-          )}
-        </div>
+        <div className="absolute inset-0 bg-black/55" />
 
-        <h1 className="mt-5 max-w-3xl text-5xl font-black tracking-tight">
-          {course.title}
-        </h1>
+        <div className="relative z-10">
+          <div className="flex flex-wrap gap-2">
+            <span className="pill bg-black/30">{course.level}</span>
 
-        <p className="mt-5 max-w-2xl text-white/70">
-          {course.description}
-        </p>
+            {course.premium ? (
+              <span className="pill bg-gold/25 text-yellow-100">Premium</span>
+            ) : (
+              <span className="pill bg-black/30">Free</span>
+            )}
+          </div>
 
-        <div className="mt-6 flex flex-wrap gap-3 text-sm">
-          <span className="pill bg-black/30">{lessons.length} lessons</span>
-          <span className="pill bg-black/30">{course.duration}</span>
-          <span className="pill bg-black/30">Creator focused</span>
-        </div>
+          <h1 className="mt-5 max-w-3xl text-5xl font-black tracking-tight">
+            {course.title}
+          </h1>
 
-        <div className="mt-8 flex flex-wrap gap-3">
-          {firstLesson ? (
-            <Link href={`/courses/${course.id}/lesson/${firstLesson.order}`} className="primary-button">
-              Start course
+          <p className="mt-5 max-w-2xl text-white/70">
+            {course.description}
+          </p>
+
+          <div className="mt-6 flex flex-wrap gap-3 text-sm">
+            <span className="pill bg-black/30">{lessons.length} lessons</span>
+            <span className="pill bg-black/30">{course.duration}</span>
+            <span className="pill bg-black/30">Creator focused</span>
+          </div>
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            {firstLesson ? (
+              <Link href={`/courses/${course.id}/lesson/${firstLesson.order}`} className="primary-button">
+                Start course
+              </Link>
+            ) : (
+              <span className="secondary-button opacity-60">
+                No lessons added yet
+              </span>
+            )}
+
+            <Link href="/courses" className="secondary-button">
+              Back to courses
             </Link>
-          ) : (
-            <span className="secondary-button opacity-60">
-              No lessons added yet
-            </span>
-          )}
-
-          <Link href="/courses" className="secondary-button">
-            Back to courses
-          </Link>
+          </div>
         </div>
       </div>
 
