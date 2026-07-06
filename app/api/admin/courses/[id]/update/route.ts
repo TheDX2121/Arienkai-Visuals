@@ -27,6 +27,7 @@ export async function POST(
 
   const title = String(formData.get("title") || "").trim();
   const description = String(formData.get("description") || "").trim();
+  const categoryId = String(formData.get("categoryId") || "").trim();
   const level = String(formData.get("level") || "Beginner").trim();
   const lessons = Number(formData.get("lessons") || 1);
   const duration = String(formData.get("duration") || "1h").trim();
@@ -48,6 +49,7 @@ export async function POST(
     SET
       "title" = ${title},
       "description" = ${description},
+      "categoryId" = ${categoryId || null},
       "level" = ${level},
       "lessons" = ${Number.isFinite(lessons) ? lessons : 1},
       "duration" = ${duration},
