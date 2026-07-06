@@ -1,32 +1,144 @@
-export default function UploadPage() {
+import { redirect } from "next/navigation";
+import { currentUser } from "@/lib/auth";
+import { CloudinaryUploadField } from "@/components/cloudinary-upload-field";
+
+type UploadPageProps = {
+  searchParams: Promise<{
+    error?: string;
+    success?: string;
+  }>;
+};
+
+function getErrorMessage(error?: string) {
+  if (error === "missing-fields") {
+    return "Title, description, tag, hashtag, and file are required.";
+  }
+
+  if (error === "not-logged-in") {
+    return "Please login before uploading.";
+  }
+
+  return "";
+}
+
+export default async function UploadPage({ searchParams }: UploadPageProps) {
+  const user = await currentUser();
+  const params = await searchParams;
+
+  if (!user) {
+    redirect("/login?next=/upload");
+  }
+
+  const errorMessage = getErrorMessage(params.error);
+
   return (
-    <section className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[.9fr_1.1fr] lg:px-8">
-      <div>
-        <div className="pill mb-4 w-fit">Creator upload</div>
-        <h1 className="text-4xl font-black">Publish anime artwork, edits, GIF previews, or design breakdowns.</h1>
-        <p className="mt-4 text-white/55">This page is Cloudinary-ready. Use `/api/upload/signature` for signed uploads, then save the returned media URL to a post.</p>
+    <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mb-8">
+        <div className="pill mb-4 w-fit">Upload post</div>
+
+        <h1 className="text-4xl font-black">
+          Share your artwork, edit, thumbnail, or GFX preview.
+        </h1>
+
+        <p className="mt-3 text-white/55">
+          Required: title, description, tag, hashtag, and file. Anime tag is optional.
+        </p>
       </div>
-      <form action="/api/posts" method="post" className="glass-panel rounded-[2rem] p-6">
-        <label className="mb-2 block text-sm font-bold">Title</label>
-        <input className="input" name="title" placeholder="Akuma City Color Grade" />
-        <label className="mb-2 mt-5 block text-sm font-bold">Caption</label>
-        <textarea className="input min-h-28" name="caption" placeholder="Explain your process, plugins, colors, and inspiration..." />
-        <div className="mt-5 grid gap-5 md:grid-cols-2">
-          <div>
-            <label className="mb-2 block text-sm font-bold">Hashtags</label>
-            <input className="input" name="hashtags" placeholder="aftereffects, animeedit, gfx" />
-          </div>
-          <div>
-            <label className="mb-2 block text-sm font-bold">Anime tags</label>
-            <input className="input" name="animeTags" placeholder="Solo Leveling, Naruto" />
-          </div>
+
+      {params.success ? (
+        <div className="mb-6 rounded-2xl border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-100">
+          Post uploaded successfully. Check Explore.
         </div>
-        <div className="mt-5 rounded-[1.5rem] border border-dashed border-white/20 bg-black/30 p-8 text-center">
-          <div className="text-4xl">☁</div>
-          <div className="mt-3 font-black">Drop media here</div>
-          <p className="mt-2 text-sm text-white/45">Wire this to Cloudinary Upload Widget or signed server upload.</p>
+      ) : null}
+
+      {errorMessage ? (
+        <div className="mb-6 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-100">
+          {errorMessage}
         </div>
-        <button className="primary-button mt-6 w-full" type="submit">Publish post</button>
+      ) : null}
+
+      <form
+        action="/api/posts"
+        method="post"
+        className="glass-panel rounded-[2rem] p-6"
+      >
+        <label className="mb-2 block text-sm font-bold">
+          Title <span className="text-red-300">*</span>
+        </label>
+
+        <input
+          className="input"
+          name="title"
+          placeholder="Akuma City Color Grade"
+          required
+        />
+
+        <label className="mb-2 mt-5 block text-sm font-bold">
+          Description <span className="text-red-300">*</span>
+        </label>
+
+        <textarea
+          className="input min-h-32"
+          name="description"
+          placeholder="Write what this post is about..."
+          required
+        />
+
+        <label className="mb-2 mt-5 block text-sm font-bold">
+          Tag <span className="text-red-300">*</span>
+        </label>
+
+        <select className="input" name="tag" defaultValue="" required>
+          <option value="" disabled>
+            Select tag
+          </option>
+          <option value="Artwork">Artwork</option>
+          <option value="Thumbnail">Thumbnail</option>
+          <option value="Video Edit">Video Edit</option>
+          <option value="GFX">GFX</option>
+          <option value="UI/UX">UI/UX</option>
+          <option value="Motion Graphics">Motion Graphics</option>
+          <option value="Other">Other</option>
+        </select>
+
+        <label className="mb-2 mt-5 block text-sm font-bold">
+          Hashtag <span className="text-red-300">*</span>
+        </label>
+
+        <input
+          className="input"
+          name="hashtag"
+          placeholder="animeedit"
+          required
+        />
+
+        <p className="mt-2 text-xs text-white/40">
+          Write without #. Example: animeedit, thumbnaildesign, gfxpack
+        </p>
+
+        <label className="mb-2 mt-5 block text-sm font-bold">
+          Anime tag optional
+        </label>
+
+        <input
+          className="input"
+          name="animeTag"
+          placeholder="Demon Slayer, Jujutsu Kaisen, Naruto..."
+        />
+
+        <CloudinaryUploadField
+          name="fileUrl"
+          label="Drop file / Upload file *"
+          resourceType="auto"
+          buttonText="Upload file"
+          placeholder="Upload image/video or paste media URL"
+          allowedFormats={["jpg", "jpeg", "png", "webp", "mp4", "mov", "webm"]}
+          maxFileSizeBytes={500000000}
+        />
+
+        <button className="primary-button mt-6 w-full justify-center" type="submit">
+          Publish to Explore
+        </button>
       </form>
     </section>
   );
