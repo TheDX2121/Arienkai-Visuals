@@ -9,18 +9,28 @@ const schema = z.object({
   password: z.string().min(1)
 });
 
+function safeRedirectPath(path: string | null) {
+  if (!path) return null;
+  if (!path.startsWith("/")) return null;
+  if (path.startsWith("//")) return null;
+  return path;
+}
+
 export async function POST(request: NextRequest) {
+  const nextPath = safeRedirectPath(request.nextUrl.searchParams.get("next"));
+
   const formData = await request.formData();
   const parsed = schema.safeParse(Object.fromEntries(formData));
 
   if (!parsed.success) {
-    return NextResponse.redirect(
-      new URL("/login?error=invalid-fields", request.url),
-      { status: 303 }
-    );
+    const url = new URL("/login", request.url);
+    url.searchParams.set("error", "invalid-fields");
+    if (nextPath) url.searchParams.set("next", nextPath);
+
+    return NextResponse.redirect(url, { status: 303 });
   }
 
-  const identifier = parsed.data.identifier.toLowerCase();
+  const identifier = parsed.data.identifier.toLowerCase().trim();
 
   const user = await prisma.user.findFirst({
     where: {
@@ -39,19 +49,24 @@ export async function POST(request: NextRequest) {
   });
 
   if (!user?.passwordHash) {
-    return NextResponse.redirect(
-      new URL("/login?error=invalid-credentials", request.url),
-      { status: 303 }
-    );
+    const url = new URL("/login", request.url);
+    url.searchParams.set("error", "invalid-credentials");
+    if (nextPath) url.searchParams.set("next", nextPath);
+
+    return NextResponse.redirect(url, { status: 303 });
   }
 
-  const ok = await bcrypt.compare(parsed.data.password, user.passwordHash);
+  const passwordIsCorrect = await bcrypt.compare(
+    parsed.data.password,
+    user.passwordHash
+  );
 
-  if (!ok) {
-    return NextResponse.redirect(
-      new URL("/login?error=invalid-credentials", request.url),
-      { status: 303 }
-    );
+  if (!passwordIsCorrect) {
+    const url = new URL("/login", request.url);
+    url.searchParams.set("error", "invalid-credentials");
+    if (nextPath) url.searchParams.set("next", nextPath);
+
+    return NextResponse.redirect(url, { status: 303 });
   }
 
   await setSessionCookie(
@@ -64,7 +79,7 @@ export async function POST(request: NextRequest) {
   );
 
   return NextResponse.redirect(
-    new URL(`/profile/${user.username}`, request.url),
+    new URL(nextPath || `/profile/${user.username}`, request.url),
     { status: 303 }
   );
 }
