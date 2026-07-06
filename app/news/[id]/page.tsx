@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 type NewsDetailPageProps = {
   params: Promise<{
-    slug: string;
+    id: string;
   }>;
 };
 
@@ -21,7 +21,7 @@ type DbNews = {
   createdAt: Date;
 };
 
-async function getNews(slug: string) {
+async function getNews(id: string) {
   try {
     const rows = await prisma.$queryRaw<DbNews[]>`
       SELECT
@@ -36,8 +36,8 @@ async function getNews(slug: string) {
         "isFeatured",
         "createdAt"
       FROM "News"
-      WHERE "slug" = ${slug}
-      OR "id" = ${slug}
+      WHERE "id" = ${id}
+      OR "slug" = ${id}
       LIMIT 1
     `;
 
@@ -48,8 +48,8 @@ async function getNews(slug: string) {
 }
 
 export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
-  const { slug } = await params;
-  const news = await getNews(slug);
+  const { id } = await params;
+  const news = await getNews(id);
 
   if (!news) {
     notFound();
@@ -76,6 +76,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
           <div className="absolute bottom-6 left-6 right-6">
             <div className="mb-4 flex flex-wrap gap-2">
               <span className="pill bg-black/40">{news.tag}</span>
+
               {news.isFeatured ? (
                 <span className="pill bg-black/40">Featured</span>
               ) : null}
