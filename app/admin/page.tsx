@@ -40,6 +40,11 @@ export default async function AdminPage() {
       description: "Manage users, roles, premium plans, posts, followers, and moderation."
     },
     {
+      title: "Navbar",
+      href: "/admin/navbar",
+      description: "Edit logo, navbar links, and navbar buttons."
+    },
+    {
       title: "Footer",
       href: "/admin/footer",
       description: "Edit footer brand, description, and links."
