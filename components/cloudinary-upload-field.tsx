@@ -11,6 +11,8 @@ type CloudinaryUploadFieldProps = {
   resourceType: ResourceType;
   buttonText: string;
   placeholder: string;
+  allowedFormats?: string[];
+  maxFileSizeBytes?: number;
 };
 
 type CloudinaryWidgetResult = {
@@ -33,7 +35,7 @@ declare global {
   }
 }
 
-function allowedFormats(resourceType: ResourceType) {
+function defaultAllowedFormats(resourceType: ResourceType) {
   if (resourceType === "image") {
     return ["jpg", "jpeg", "png", "webp"];
   }
@@ -42,10 +44,24 @@ function allowedFormats(resourceType: ResourceType) {
     return ["mp4", "mov", "webm"];
   }
 
-  return ["vtt"];
+  return [
+    "vtt",
+    "pdf",
+    "zip",
+    "rar",
+    "7z",
+    "psd",
+    "ai",
+    "eps",
+    "aep",
+    "prproj",
+    "mogrt",
+    "json",
+    "txt"
+  ];
 }
 
-function maxFileSize(resourceType: ResourceType) {
+function defaultMaxFileSize(resourceType: ResourceType) {
   if (resourceType === "image") {
     return 10000000;
   }
@@ -54,7 +70,7 @@ function maxFileSize(resourceType: ResourceType) {
     return 500000000;
   }
 
-  return 5000000;
+  return 300000000;
 }
 
 export function CloudinaryUploadField({
@@ -63,7 +79,9 @@ export function CloudinaryUploadField({
   defaultValue,
   resourceType,
   buttonText,
-  placeholder
+  placeholder,
+  allowedFormats,
+  maxFileSizeBytes
 }: CloudinaryUploadFieldProps) {
   const [value, setValue] = useState(defaultValue || "");
   const [isReady, setIsReady] = useState(false);
@@ -114,8 +132,8 @@ export function CloudinaryUploadField({
         resourceType,
         multiple: false,
         sources: ["local", "url"],
-        clientAllowedFormats: allowedFormats(resourceType),
-        maxFileSize: maxFileSize(resourceType)
+        clientAllowedFormats: allowedFormats || defaultAllowedFormats(resourceType),
+        maxFileSize: maxFileSizeBytes || defaultMaxFileSize(resourceType)
       },
       (error, result) => {
         if (error) {
