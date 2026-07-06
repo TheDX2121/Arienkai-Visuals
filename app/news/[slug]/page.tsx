@@ -37,6 +37,7 @@ async function getNews(slug: string) {
         "createdAt"
       FROM "News"
       WHERE "slug" = ${slug}
+      OR "id" = ${slug}
       LIMIT 1
     `;
 
@@ -75,7 +76,9 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
           <div className="absolute bottom-6 left-6 right-6">
             <div className="mb-4 flex flex-wrap gap-2">
               <span className="pill bg-black/40">{news.tag}</span>
-              {news.isFeatured ? <span className="pill bg-black/40">Featured</span> : null}
+              {news.isFeatured ? (
+                <span className="pill bg-black/40">Featured</span>
+              ) : null}
             </div>
 
             <h1 className="max-w-3xl text-4xl font-black sm:text-5xl">
