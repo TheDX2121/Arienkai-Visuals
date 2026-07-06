@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
   const level = String(formData.get("level") || "Beginner").trim();
   const lessons = Number(formData.get("lessons") || 1);
   const duration = String(formData.get("duration") || "1h").trim();
+  const thumbnailUrl = String(formData.get("thumbnailUrl") || "").trim();
   const gradient = String(
     formData.get("gradient") || "from-red-700 via-black to-purple-900"
   ).trim();
@@ -59,6 +60,7 @@ export async function POST(request: NextRequest) {
       "lessons",
       "duration",
       "gradient",
+      "thumbnailUrl",
       "isPremium",
       "createdAt"
     )
@@ -71,6 +73,7 @@ export async function POST(request: NextRequest) {
       ${Number.isFinite(lessons) ? lessons : 1},
       ${duration},
       ${gradient},
+      ${thumbnailUrl || null},
       ${isPremium},
       NOW()
     )
